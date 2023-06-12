@@ -52,7 +52,7 @@ rf_parameters = {"n_estimators": [16, 32, 64, 128],
                  "min_samples_split": [2, 4, 8, 16]}
 rf_cv = GridSearchCV(rf, rf_parameters, scoring="accuracy", cv=kf)
 
-nb_parameters = {}
+nb_parameters = {'var_smoothing': np.logspace(0,-9, num=10)}
 nb_cv = GridSearchCV(nb, nb_parameters, scoring="accuracy", cv=kf)
 
 knn_parameters = {"n_neighbors": list(range(1, 50)),
@@ -103,4 +103,32 @@ plt.title("Accuracy Values - Cross-validation")
 plt.xlabel("Model")
 plt.ylabel("Accuracy")
 plt.xticks([1, 2, 3], ["Random Forest", "Gaussian Naive Bayes", "K-Nearest Neighbors"])
+plt.show()
+
+
+# Obliczanie dokładności dla każdego modelu
+rf_accuracy = rf_cv.score(X_test_scaled, y_test)
+nb_accuracy = nb_cv.score(X_test_scaled, y_test)
+knn_accuracy = knn_cv.score(X_test_scaled, y_test)
+
+# Obliczanie wag dla średniej ważonej
+total_accuracy = rf_accuracy + nb_accuracy + knn_accuracy
+rf_weight = rf_accuracy / total_accuracy
+nb_weight = nb_accuracy / total_accuracy
+knn_weight = knn_accuracy / total_accuracy
+
+# Obliczanie średniej ważonej
+hybrid_accuracy = (rf_weight * rf_accuracy) + (nb_weight * nb_accuracy) + (knn_weight * knn_accuracy)
+
+# Wyświetlanie dokładności dla powstałego modelu hybrydowego
+print("Hybrid Model Accuracy: ", hybrid_accuracy)
+
+# Tworzenie wykresu
+model_labels = ["Random Forest", "Gaussian Naive Bayes", "K-Nearest Neighbors", "Hybrid Model"]
+accuracy_values = [rf_accuracy_values, nb_accuracy_values, knn_accuracy_values, [hybrid_accuracy]]
+
+plt.boxplot(accuracy_values, patch_artist=True, labels=model_labels, boxprops=dict())
+plt.title("Accuracy Values - Cross-validation")
+plt.xlabel("Model")
+plt.ylabel("Accuracy")
 plt.show()

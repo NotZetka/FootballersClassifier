@@ -26,6 +26,16 @@ stats_df["Pos"] = stats_df["Pos"].str.slice(stop=2)
 print(stats_df.head())
 print(stats_df.info())
 
+# Inicjalizacja modelu
+bayes = GaussianNB()  # Dodana linia
+
+# Tworzenie Foldów do walidacji krzyżowej
+kf = KFold(n_splits=6, shuffle=True)
+
+# Tworzenie siatki przeszukiwań
+parameters = {'var_smoothing': np.logspace(0,-9, num=10)}
+stats_cv = GridSearchCV(bayes, parameters, scoring="accuracy", cv=kf)
+
 # Podział tabeli na cechy i etykiety
 X = stats_df.drop("Pos", axis=1).values
 y = stats_df["Pos"].values
@@ -36,15 +46,7 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.fit_transform(X_test)
 
-nb = GaussianNB()
-
-# Tworzenie Foldów do walidacji krzyżowej
-kf = KFold(n_splits=6, shuffle=True)
-
-# Tworzenie siatki przeszukiwań
-parameters = {}
-stats_cv = GridSearchCV(nb, parameters, scoring="accuracy", cv=kf)
-
+# Tworzenie modelu
 stats_cv.fit(X_train_scaled, y_train)
 
 # Wyświetlanie najlepszych parametrów i wyniku
@@ -64,7 +66,11 @@ plt.boxplot(accuracy_values, patch_artist=True)
 plt.title("Accuracy Values - Cross-validation")
 plt.xlabel("Parameter Combinations")
 plt.ylabel("Accuracy")
-plt.ylim(0.863, 0.865)
+plt.show()
 
-
+# Wykres boxplota dla wartości dokładności dla klasyfikatora Bayesa
+bayes_scores = stats_cv.cv_results_['mean_test_score']
+plt.boxplot(bayes_scores, patch_artist=True)
+plt.title("Accuracy Values - Gaussian Naive Bayes")
+plt.ylabel("Accuracy")
 plt.show()

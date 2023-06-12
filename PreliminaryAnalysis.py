@@ -1,7 +1,6 @@
 # Wstępna analiza danych: średnia, mediana, minimum, maksimum, odchylenie standardowe, skośność
 # boxploty, top 10 piłkarzy - histogram
 import os
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
